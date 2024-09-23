@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>数字记忆挑战</title>
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+  background-color: #f0f4f8;
+  color: #333;
+}
+
+#timers {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 20px;
+}
+
+#numberDisplay, #inputArea {
+  margin: 20px 0;
+}
+
+#numberDisplay .row {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  flex-wrap: nowrap;
+  width: 95%;
+  max-width: 600px;
+}
+
+#numberDisplay .row span {
+  font-size: 28px;
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-radius: 5px;
+  margin: 2px;
+  padding: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#inputArea .input-row {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 5px;
+  flex-wrap: nowrap;
+  width: 95%;
+  max-width: 600px;
+}
+
+#inputArea .input-container {
+  flex: 1;
+  max-width: 40px;
+  height: 40px;
+  position: relative;
+  margin: 2px;
+}
+
+#inputArea .input-container input {
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+  text-align: center;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+#inputArea .input-container input:focus {
+  border-color: #4a90e2;
+}
+
+button {
+  margin: 15px auto;
+  padding: 12px 25px;
+  font-size: 18px;
+  text-align: center;
+  border: none;
+  border-radius: 25px;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.1s;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+button:hover {
+  background-color: #357ae8;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+#correctNumbers {
+  margin-top: 20px;
+  font-size: 18px;
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+#correctNumbers span {
+  margin: 0 2px;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.error {
+  color: #e74c3c;
+  background-color: #fef0f0;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-bottom: 0.2em;
+  color: #2c3e50;
+}
+
+h2 {
+  font-size: 1.8em;
+  margin: 0 0 0.5em;
+  color: #34495e;
+}
+
+h2 small {
+  display: block;
+  font-size: 0.6em;
+  margin-top: 0.2em;
+  color: #7f8c8d;
+  font-weight: normal;
+}
+
+.rows-input {
+  width: 60px;
+  height: 30px;
+  font-size: 16px;
+  text-align: center;
+  padding: 0 5px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.rows-input:focus {
+  border-color: #4a90e2;
+}
+
+#result {
+  white-space: pre-line;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #e8f4fd;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+
+  #numberDisplay .row span {
+    font-size: 24px;
+  }
+
+  #inputArea .input-container {
+    max-width: 35px;
+    height: 35px;
+  }
+
+  #inputArea .input-container input {
+    font-size: 18px;
+  }
+}
+</style>
+</head>
+<body>
+<h1>数字记忆挑战</h1>
+<h2>
+  世界记忆大师 邱利军
+  <small>(微信：qljcjjy)</small>
+</h2>
+<div style="margin-bottom: 20px;">
+  <span>每行20个数字</span>
+  <label for="rows" style="margin-left: 10px;">选择行数:</label>
+  <input type="number" id="rows" min="1" max="20" value="1" class="rows-input">
+</div>
+<div id="timers">
+  <div id="memoryTimer">记忆时间: 00:00</div>
+  <div id="recallTimer">回忆时间: 00:00</div>
+</div>
+<div id="numberDisplay"></div>
+<button id="generateNumbers">生成数字</button>
+<button id="endMemory" style="display: none;">结束记忆</button>
+<div id="inputArea"></div>
+<button id="submitAnswers" style="display: none;">提交答案</button>
+<div id="result"></div>
+<div id="correctNumbers"></div>
+<button id="restart" style="display: none;">再来一次</button>
+<script>
+let numbers = [];
+let memoryStartTime, recallStartTime;
+let memoryTimeSpent = 0;
+let memoryTimerInterval, recallTimerInterval;
+
+const numberDisplay = document.getElementById('numberDisplay');
+const generateButton = document.getElementById('generateNumbers');
+const endMemoryButton = document.getElementById('endMemory');
+const submitAnswersButton = document.getElementById('submitAnswers');
+const restartButton = document.getElementById('restart');
+const inputArea = document.getElementById('inputArea');
+const resultDiv = document.getElementById('result');
+const rowsInput = document.getElementById('rows');
+const memoryTimerDiv = document.getElementById('memoryTimer');
+const recallTimerDiv = document.getElementById('recallTimer');
+const correctNumbersDiv = document.getElementById('correctNumbers');
+
+function updateTimer(timerType) {
+  let currentTime, minutes, seconds;
+  if (timerType === 'memory') {
+    currentTime = new Date().getTime() - memoryStartTime;
+    minutes = Math.floor(currentTime / 60000);
+    seconds = ((currentTime % 60000) / 1000).toFixed(2);
+    memoryTimerDiv.textContent = `记忆时间: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  } else if (timerType === 'recall') {
+    currentTime = new Date().getTime() - recallStartTime;
+    minutes = Math.floor(currentTime / 60000);
+    seconds = ((currentTime % 60000) / 1000).toFixed(2);
+    recallTimerDiv.textContent = `回忆时间: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+}
+
+function startTimer(timerType) {
+  if (timerType === 'memory') {
+    memoryStartTime = new Date().getTime();
+    memoryTimerInterval = setInterval(() => updateTimer('memory'), 10);
+  } else if (timerType === 'recall') {
+    recallStartTime = new Date().getTime();
+    recallTimerInterval = setInterval(() => updateTimer('recall'), 10);
+  }
+}
+
+function stopTimer(timerType) {
+  clearInterval(timerType === 'memory' ? memoryTimerInterval : recallTimerInterval);
+}
+
+function generateNumbers() {
+  numbers = [];
+  numberDisplay.innerHTML = '';
+  inputArea.innerHTML = '';
+  correctNumbersDiv.innerHTML = '';
+  const rows = parseInt(rowsInput.value, 10);
+  for (let i = 0; i < rows; i++) {
+    let rowDiv = document.createElement('div');
+    rowDiv.classList.add('row');
+    for (let j = 0; j < 20; j++) {
+      let number = Math.floor(Math.random() * 10);
+      numbers.push(number);
+      let numSpan = document.createElement('span');
+      numSpan.textContent = number;
+      rowDiv.appendChild(numSpan);
+    }
+    numberDisplay.appendChild(rowDiv);
+  }
+  generateButton.style.display = 'none';
+  endMemoryButton.style.display = 'block';
+  startTimer('memory');
+}
+
+function endMemory() {
+  stopTimer('memory');
+  memoryTimeSpent = new Date().getTime() - memoryStartTime;
+  endMemoryButton.style.display = 'none';
+  submitAnswersButton.style.display = 'block';
+  recallTimerDiv.style.display = 'block';
+  startTimer('recall');
+  numberDisplay.innerHTML = '';
+
+  const inputCount = rowsInput.value * 20;
+  let inputRowDiv;
+  for (let i = 0; i < inputCount; i++) {
+    if (i % 10 === 0) {
+      inputRowDiv = document.createElement('div');
+      inputRowDiv.classList.add('input-row');
+    }
+
+    let inputContainer = document.createElement('div');
+    inputContainer.classList.add('input-container');
+    let input = document.createElement('input');
+    input.type = 'text';
+    input.min = 0;
+    input.max = 9;
+    input.pattern = '\\d*';
+    input.style.width = '30px';
+    input.style.height = '30px';
+    input.style.textAlign = 'center';
+    input.id = `input${i}`;
+
+    input.addEventListener('click', () => input.focus());
+    input.addEventListener('input', event => {
+      let value = event.target.value.replace(/[^0-9]/g, '');
+      event.target.value = value;
+      moveFocus(event.target);
+    });
+    input.addEventListener('keydown', event => {
+      if (['Enter', 'Tab'].includes(event.key)) {
+        event.preventDefault();
+        moveFocus(event.target);
+      } else if (['Backspace', 'Delete'].includes(event.key)) {
+        event.preventDefault();
+        input.value = '';
+        moveBackFocus(event.target);
+      }
+    });
+
+    inputContainer.appendChild(input);
+    inputRowDiv.appendChild(inputContainer);
+
+    if (i % 10 === 9 || i === inputCount - 1) {
+      inputArea.appendChild(inputRowDiv);
+    }
+  }
+
+  document.getElementById('input0').focus();
+
+  // 优化移动设备上的输入体验
+  if ('ontouchstart' in window) {
+    let inputs = document.querySelectorAll('#inputArea .input-container input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        // 滚动到当前输入框
+        this.scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+    });
+  }
+}
+
+function moveFocus(currentInput) {
+  let currentIndex = parseInt(currentInput.id.replace('input', ''));
+  let nextIndex = currentIndex + 1;
+  if (nextIndex < 20 * rowsInput.value) {
+    let nextInput = document.getElementById(`input${nextIndex}`);
+    nextInput?.focus()?.select();
+  } else {
+    submitAnswersButton.focus();
+  }
+}
+
+function moveBackFocus(currentInput) {
+  let currentIndex = parseInt(currentInput.id.replace('input', ''));
+  let prevIndex = currentIndex - 1;
+  if (prevIndex >= 0) {
+    let prevInput = document.getElementById(`input${prevIndex}`);
+    prevInput?.focus()?.select();
+  }
+}
+
+function submitAnswers() {
+  stopTimer('recall');
+  let userNumbers = Array.from(document.querySelectorAll('#inputArea .input-container input')).map(input => 
+    input.value === '' ? -1 : parseInt(input.value)
+  );
+  let correct = 0, incorrect = 0;
+  let inputs = document.querySelectorAll('#inputArea .input-container input');
+  
+  resultDiv.innerHTML = '';
+  correctNumbersDiv.innerHTML = '';
+  inputs.forEach((input, index) => {
+    let correctNumberSpan = document.createElement('span');
+    correctNumberSpan.textContent = numbers[index];
+    if (userNumbers[index] === -1 || numbers[index] !== userNumbers[index]) {
+      incorrect++;
+      input.parentElement.style.backgroundColor = 'red';
+      correctNumberSpan.className = 'error';
+    } else {
+      correct++;
+    }
+    correctNumbersDiv.appendChild(correctNumberSpan);
+    correctNumbersDiv.appendChild(document.createTextNode(' '));
+
+    if ((index + 1) % 20 === 0 && index < numbers.length - 1) {
+      correctNumbersDiv.appendChild(document.createTextNode('　'));
+    }
+  });
+
+  let recallTime = (new Date().getTime() - recallStartTime) / 1000;
+  resultDiv.textContent = `正确个数: ${correct}, 错误个数: ${incorrect}, 记忆时间: ${memoryTimeSpent / 1000}秒\n回忆时间: ${recallTime.toFixed(2)}秒`;
+  submitAnswersButton.style.display = 'none';
+  restartButton.style.display = 'block';
+}
+
+function restart() {
+  restartButton.style.display = 'none';
+  generateButton.style.display = 'block';
+  endMemoryButton.style.display = 'none';
+  submitAnswersButton.style.display = 'none';
+  numberDisplay.innerHTML = '';
+  inputArea.innerHTML = '';
+  resultDiv.innerHTML = '';
+  correctNumbersDiv.innerHTML = '';
+  memoryTimerDiv.textContent = '记忆时间: 00:00';
+  recallTimerDiv.textContent = '回忆时间: 00:00';
+  stopTimer('memory');
+  stopTimer('recall');
+  memoryTimeSpent = 0;
+}
+
+generateButton.addEventListener('click', generateNumbers);
+endMemoryButton.addEventListener('click', endMemory);
+submitAnswersButton.addEventListener('click', submitAnswers);
+restartButton.addEventListener('click', restart);
+</script>
+</body>
+</html>
